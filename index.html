@@ -341,8 +341,6 @@
         let totalClicks = 0;
         let cardCollection = {};
         let totalCardsEarned = 0;
-        let autoClickerActive = false;
-        let autoClickerInterval = null;
 
         // Initialize collection
         function initCollection() {
@@ -396,18 +394,6 @@
         }
 
         function handleClick() {
-            console.log('Button clicked!');
-            
-            // Toggle auto-clicker
-            if (!autoClickerActive) {
-                autoClickerActive = true;
-                startAutoClicker();
-            } else {
-                autoClickerActive = false;
-                stopAutoClicker();
-            }
-            
-            // Regular click
             processClick();
         }
         
@@ -438,28 +424,6 @@
                 document.getElementById('progressBar').textContent = '0/10';
                 document.getElementById('progressBar').style.width = '0%';
             }
-        }
-        
-        function startAutoClicker() {
-            if (autoClickerInterval) return;
-            
-            // Click 100 times per second (10ms interval)
-            autoClickerInterval = setInterval(() => {
-                processClick();
-            }, 10);
-            
-            // Add visual feedback
-            document.querySelector('.click-button').style.boxShadow = '0 0 20px #00ff88';
-        }
-        
-        function stopAutoClicker() {
-            if (autoClickerInterval) {
-                clearInterval(autoClickerInterval);
-                autoClickerInterval = null;
-            }
-            
-            // Remove visual feedback
-            document.querySelector('.click-button').style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
         }
 
         function updateStats() {
