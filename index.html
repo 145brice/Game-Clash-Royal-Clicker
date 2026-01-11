@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clash Royale Clicker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial Black', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #5b3a8f;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            text-align: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+        }
+
+        .clicker-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .click-button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+            padding: 30px 60px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.1s, box-shadow 0.3s;
+            box-shadow: 0 10px 30px rgba(245, 87, 108, 0.4);
+        }
+
+        .click-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(245, 87, 108, 0.6);
+        }
+
+        .click-button:active {
+            transform: scale(0.95);
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-top: 15px;
+            position: relative;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .card-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .card-notification.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .card-notification h2 {
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .card-notification .card-name {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            display: none;
+        }
+
+        .overlay.show {
+            display: block;
+        }
+
+        .collection {
+            margin-top: 30px;
+        }
+
+        .collection h2 {
+            color: #5b3a8f;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .rarity-section {
+            margin-bottom: 25px;
+        }
+
+        .rarity-header {
+            font-weight: bold;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .rarity-common { background: #c0c0c0; }
+        .rarity-rare { background: #ff9500; }
+        .rarity-epic { background: #a83dda; }
+        .rarity-legendary { background: #ffd700; color: #333; }
+        .rarity-champion { background: #00d4ff; }
+        .rarity-evolution { background: linear-gradient(135deg, #b24bf3 0%, #7b2cbf 100%); }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+        }
+
+        .card-item {
+            padding: 15px 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.85em;
+            background: white;
+            border: 2px solid #ddd;
+        }
+
+        .card-item.collected {
+            border-color: #4caf50;
+            background: #e8f5e9;
+        }
+
+        .card-item.duplicate {
+            opacity: 0.6;
+        }
+
+        .card-count {
+            font-size: 0.75em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>⚔️ Clash Royale Clicker ⚔️</h1>
+        <p class="subtitle">Press SPACEBAR or click the button to unlock cards!</p>
+
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-label">Total Clicks</div>
+                <div class="stat-value" id="totalClicks">0</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Cards Unlocked</div>
+                <div class="stat-value" id="cardsUnlocked">0/121</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">Total Cards Earned</div>
+                <div class="stat-value" id="totalCards">0</div>
+            </div>
+        </div>
+
+        <div class="clicker-area">
+            <button class="click-button" id="clickBtn">CLICK ME!</button>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar">0/10</div>
+            </div>
+        </div>
+
+        <div class="collection">
+            <h2>📚 Card Collection</h2>
+            <div id="collectionContainer"></div>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay"></div>
+    <div class="card-notification" id="cardNotification">
+        <h2>🎉 New Card! 🎉</h2>
+        <div class="card-name" id="cardName"></div>
+        <div class="card-rarity" id="cardRarity"></div>
+    </div>
+
+    <script>
+        const cards = {
+            common: [
+                // 29 Common cards (Tower Princess removed - tower troops separate)
+                'Knight', 'Archers', 'Goblins', 'Minions', 'Barbarians', 'Skeletons',
+                'Bomber', 'Spear Goblins', 'Minion Horde', 'Electro Spirit', 'Skeleton Dragons',
+                'Fire Spirit', 'Ice Spirit', 'Bats', 'Royal Recruits', 'Royal Giant',
+                'Berserker', 'Skeleton Barrel', 'Goblin Gang', 'Elite Barbarians',
+                'Firecracker', 'Rascals', 'Arrows', 'Zap', 'Giant Snowball',
+                'Royal Delivery', 'Cannon', 'Mortar', 'Tesla'
+            ],
+            rare: [
+                // 30 Rare cards
+                'Mini P.E.K.K.A', 'Musketeer', 'Giant', 'Valkyrie', 'Mega Minion',
+                'Battle Ram', 'Wizard', 'Flying Machine', 'Hog Rider', 'Royal Hogs',
+                'Three Musketeers', 'Battle Healer', 'Ice Golem', 'Dart Goblin',
+                'Furnace', 'Zappies', 'Goblin Demolisher', 'Heal Spirit',
+                'Suspicious Bush', 'Elixir Golem', 'Fireball', 'Rocket', 'Earthquake',
+                'Goblin Cage', 'Goblin Hut', 'Tombstone', 'Bomb Tower',
+                'Inferno Tower', 'Barbarian Hut', 'Elixir Collector'
+            ],
+            epic: [
+                // 33 Epic cards (Cannoneer removed - tower troops separate)
+                'Guards', 'Baby Dragon', 'Skeleton Army', 'Witch', 'P.E.K.K.A',
+                'Dark Prince', 'Prince', 'Balloon', 'Giant Skeleton', 'Rune Giant',
+                'Goblin Giant', 'Hunter', 'Golem', 'Electro Dragon', 'Wall Breakers',
+                'Electro Giant', 'Bowler', 'Executioner', 'Cannon Cart',
+                'Goblin Barrel', 'Vines', 'Lightning', 'Freeze', 'Barbarian Barrel',
+                'Poison', 'Goblin Curse', 'Rage', 'Clone', 'Tornado', 'Mirror',
+                'Void', 'X-Bow', 'Goblin Drill'
+            ],
+            legendary: [
+                // 21 Legendary cards
+                'Mega Knight', 'Ram Rider', 'Electro Wizard', 'Inferno Dragon',
+                'Sparky', 'Miner', 'Princess', 'Phoenix', 'Royal Ghost',
+                'Ice Wizard', 'Magic Archer', 'Bandit', 'Lava Hound',
+                'Night Witch', 'Lumberjack', 'Spirit Empress', 'Goblin Machine',
+                'Mother Witch', 'Fisherman', 'The Log', 'Graveyard'
+            ],
+            champion: [
+                // 8 Champion cards
+                'Golden Knight', 'Archer Queen', 'Skeleton King', 'Mighty Miner',
+                'Monk', 'Little Prince', 'Goblinstein', 'Boss Bandit'
+            ],
+            evolution: [
+                // 39 Evolution cards
+                'Evo Archers', 'Evo Baby Dragon', 'Evo Barbarians', 'Evo Bats',
+                'Evo Battle Ram', 'Evo Bomber', 'Evo Cannon', 'Evo Dart Goblin',
+                'Evo Electro Dragon', 'Evo Executioner', 'Evo Firecracker', 'Evo Furnace',
+                'Evo Giant Snowball', 'Evo Goblin Barrel', 'Evo Goblin Cage', 'Evo Goblin Drill',
+                'Evo Goblin Giant', 'Evo Hunter', 'Evo Ice Spirit', 'Evo Inferno Dragon',
+                'Evo Knight', 'Evo Lumberjack', 'Evo Mega Knight', 'Evo Mortar',
+                'Evo Musketeer', 'Evo P.E.K.K.A', 'Evo Royal Ghost', 'Evo Royal Giant',
+                'Evo Royal Hogs', 'Evo Royal Recruits', 'Evo Skeleton Army', 'Evo Skeleton Barrel',
+                'Evo Skeletons', 'Evo Tesla', 'Evo Valkyrie', 'Evo Wall Breakers',
+                'Evo Witch', 'Evo Wizard', 'Evo Zap'
+            ]
+        };
+
+        const rarityWeights = {
+            common: 50,
+            rare: 30,
+            epic: 15,
+            legendary: 4,
+            champion: 1,
+            evolution: 0.5
+        };
+
+        let clicks = 0;
+        let totalClicks = 0;
+        let cardCollection = {};
+        let totalCardsEarned = 0;
+        let autoClickerActive = false;
+        let autoClickerInterval = null;
+
+        // Initialize collection
+        function initCollection() {
+            for (let rarity in cards) {
+                cards[rarity].forEach(card => {
+                    cardCollection[card] = { rarity, count: 0 };
+                });
+            }
+            renderCollection();
+        }
+
+        function getRandomCard() {
+            const totalWeight = Object.values(rarityWeights).reduce((a, b) => a + b, 0);
+            let random = Math.random() * totalWeight;
+            
+            let selectedRarity;
+            for (let rarity in rarityWeights) {
+                random -= rarityWeights[rarity];
+                if (random <= 0) {
+                    selectedRarity = rarity;
+                    break;
+                }
+            }
+
+            const rarityCards = cards[selectedRarity];
+            const randomCard = rarityCards[Math.floor(Math.random() * rarityCards.length)];
+            return { card: randomCard, rarity: selectedRarity };
+        }
+
+        function showCardNotification(cardName, rarity) {
+            const notification = document.getElementById('cardNotification');
+            const overlay = document.getElementById('overlay');
+            const cardNameEl = document.getElementById('cardName');
+            const cardRarityEl = document.getElementById('cardRarity');
+
+            cardNameEl.textContent = cardName;
+            cardRarityEl.textContent = rarity.toUpperCase();
+            cardRarityEl.className = `rarity-${rarity}`;
+            cardRarityEl.style.padding = '10px';
+            cardRarityEl.style.borderRadius = '10px';
+            cardRarityEl.style.display = 'inline-block';
+            cardRarityEl.style.fontWeight = 'bold';
+
+            overlay.classList.add('show');
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                overlay.classList.remove('show');
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        function handleClick() {
+            console.log('Button clicked!');
+            
+            // Toggle auto-clicker
+            if (!autoClickerActive) {
+                autoClickerActive = true;
+                startAutoClicker();
+            } else {
+                autoClickerActive = false;
+                stopAutoClicker();
+            }
+            
+            // Regular click
+            processClick();
+        }
+        
+        function processClick() {
+            clicks++;
+            totalClicks++;
+            
+            document.getElementById('totalClicks').textContent = totalClicks;
+            document.getElementById('progressBar').textContent = `${clicks}/10`;
+            document.getElementById('progressBar').style.width = `${(clicks / 10) * 100}%`;
+
+            if (clicks >= 10) {
+                const { card, rarity } = getRandomCard();
+                console.log('Got card:', card, rarity);
+                
+                if (cardCollection[card]) {
+                    cardCollection[card].count++;
+                    totalCardsEarned++;
+                    
+                    showCardNotification(card, rarity);
+                    renderCollection();
+                    updateStats();
+                } else {
+                    console.error('Card not found in collection:', card);
+                }
+                
+                clicks = 0;
+                document.getElementById('progressBar').textContent = '0/10';
+                document.getElementById('progressBar').style.width = '0%';
+            }
+        }
+        
+        function startAutoClicker() {
+            if (autoClickerInterval) return;
+            
+            // Click 100 times per second (10ms interval)
+            autoClickerInterval = setInterval(() => {
+                processClick();
+            }, 10);
+            
+            // Add visual feedback
+            document.querySelector('.click-button').style.boxShadow = '0 0 20px #00ff88';
+        }
+        
+        function stopAutoClicker() {
+            if (autoClickerInterval) {
+                clearInterval(autoClickerInterval);
+                autoClickerInterval = null;
+            }
+            
+            // Remove visual feedback
+            document.querySelector('.click-button').style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.3)';
+        }
+
+        function updateStats() {
+            const uniqueCards = Object.values(cardCollection).filter(c => c.count > 0).length;
+            const totalCards = Object.keys(cardCollection).length;
+            document.getElementById('cardsUnlocked').textContent = `${uniqueCards}/${totalCards}`;
+            document.getElementById('totalCards').textContent = totalCardsEarned;
+        }
+
+        function renderCollection() {
+            const container = document.getElementById('collectionContainer');
+            container.innerHTML = '';
+
+            for (let rarity in cards) {
+                const section = document.createElement('div');
+                section.className = 'rarity-section';
+
+                const header = document.createElement('div');
+                header.className = `rarity-header rarity-${rarity}`;
+                const rarityCards = cards[rarity].filter(card => cardCollection[card].count > 0);
+                header.textContent = `${rarity.toUpperCase()} (${rarityCards.length}/${cards[rarity].length})`;
+                section.appendChild(header);
+
+                const grid = document.createElement('div');
+                grid.className = 'cards-grid';
+
+                cards[rarity].forEach(card => {
+                    const cardDiv = document.createElement('div');
+                    cardDiv.className = 'card-item';
+                    
+                    if (cardCollection[card].count > 0) {
+                        cardDiv.classList.add('collected');
+                        if (cardCollection[card].count > 1) {
+                            cardDiv.classList.add('duplicate');
+                        }
+                    }
+
+                    cardDiv.innerHTML = `
+                        <div>${card}</div>
+                        <div class="card-count">x${cardCollection[card].count}</div>
+                    `;
+                    grid.appendChild(cardDiv);
+                });
+
+                section.appendChild(grid);
+                container.appendChild(section);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('clickBtn').addEventListener('click', handleClick);
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space') {
+                e.preventDefault();
+                handleClick();
+            }
+        });
+
+        // Initialize
+        initCollection();
+    </script>
+</body>
+</html>
